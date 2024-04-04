@@ -10,6 +10,7 @@ const int swPin2 = 1;  //the SW attach to D1
 const int buzzerPin=7; //buzzer is attached to D7
 
 const int DEBUG=1; //debug variable
+//AUSTIN TEST
 LiquidCrystal lcd(17, 16, 3, 4, 5, 6);  // initialize the LCD1602
 void setup()
 {
