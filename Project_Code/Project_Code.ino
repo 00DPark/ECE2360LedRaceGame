@@ -21,6 +21,7 @@ short int player1_y = 3;
 short int cardinality = -1; //1 for y pos 2 for x pos 3 for y neg 4 for x neg
 int ONE = 1;
 int ZERO = 0;
+const short int JOYCON_INPUT_DELAY = 100;
 
 
 /* we always wait a bit between updates of the display */
@@ -147,7 +148,6 @@ void loop() {
     cardinality = 4;
     player1_x -= 1;
   }
-  delay(100);
 
   switch(cardinality){
     case(1):
@@ -167,6 +167,8 @@ void loop() {
     default:
     break;
   }
+  delay(JOYCON_INPUT_DELAY);
+
 }
 
 /* returns byte BXXXXXXXX in correspondence to player position Y */
