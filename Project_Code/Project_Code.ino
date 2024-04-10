@@ -131,22 +131,22 @@ void loop() {
     Serial.print("1\n");
 
     cardinality = 1;
-    player1_y += 1;
+    if(player1_y< 7) player1_y += 1;
   } else if(x > 1000 && y > 500){ //x axis positive
     Serial.print("2\n");
 
     cardinality = 2;
-    player1_x += 1;
+    if(player1_x< 7)player1_x += 1;
   } else if(y < 15 && x > 500){ //y axis negative
     Serial.print("3\n");
 
     cardinality = 3;
-    player1_y -= 1;
+    if(player1_y> 0)player1_y -= 1;
   } else if(y > 500 && x < 10){ //x axis negative
     Serial.print("4\n");
 
     cardinality = 4;
-    player1_x -= 1;
+    if(player1_x> 0)player1_x -= 1;
   }
 
   switch(cardinality){
