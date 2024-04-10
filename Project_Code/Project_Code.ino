@@ -22,6 +22,8 @@ short int cardinality = -1; //1 for y pos 2 for x pos 3 for y neg 4 for x neg
 int ONE = 1;
 int ZERO = 0;
 const short int JOYCON_INPUT_DELAY = 100;
+byte byte_map[8]={B00000000,B11111110,B11000100,B00010001,B01111111,B00100011,B10101000,B10001110};
+
 
 
 /* we always wait a bit between updates of the display */
@@ -39,69 +41,6 @@ void setup() {
   /* and clear the display */
   lc.clearDisplay(0);
   Serial.begin(9600);
-}
-
-/*
- This method will display the characters for the
- word "Arduino" one after the other on the matrix. 
- (you need at least 5x7 leds to see the whole chars)
- */
-void writeArduinoOnMatrix() {
-  /* here is the data for the characters */
-  //byte a[5]={B01111110,B10001000,B10001000,B10001000,B01111110};
-  byte a[8]={B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111};
-  byte r[5]={B00010000,B00100000,B00100000,B00010000,B00111110};
-  byte d[5]={B11111110,B00010010,B00100010,B00100010,B00011100};
-  byte u[5]={B00111110,B00000100,B00000010,B00000010,B00111100};
-  byte i[5]={B00000000,B00000010,B10111110,B00100010,B00000000};
-  byte n[5]={B00011110,B00100000,B00100000,B00010000,B00111110};
-  byte o[5]={B00011100,B00100010,B00100010,B00100010,B00011100};
-
-  /* now display them one by one with a small delay */
-  lc.setRow(0,0,a[0]);
-  lc.setRow(0,1,a[1]);
-  lc.setRow(0,2,a[2]);
-  lc.setRow(0,3,a[3]);
-  lc.setRow(0,4,a[4]);
-  lc.setRow(0,5,a[5]);
-  lc.setRow(0,6,a[6]);
-  lc.setRow(0,7,a[7]);
-  lc.setRow(0,8,a[8]);
-  lc.setRow(0,0,r[0]);
-  lc.setRow(0,1,r[1]);
-  lc.setRow(0,2,r[2]);
-  lc.setRow(0,3,r[3]);
-  lc.setRow(0,4,r[4]);
-  lc.setRow(0,0,d[0]);
-  lc.setRow(0,1,d[1]);
-  lc.setRow(0,2,d[2]);
-  lc.setRow(0,3,d[3]);
-  lc.setRow(0,4,d[4]);
-  lc.setRow(0,0,u[0]);
-  lc.setRow(0,1,u[1]);
-  lc.setRow(0,2,u[2]);
-  lc.setRow(0,3,u[3]);
-  lc.setRow(0,4,u[4]);
-  lc.setRow(0,0,i[0]);
-  lc.setRow(0,1,i[1]);
-  lc.setRow(0,2,i[2]);
-  lc.setRow(0,3,i[3]);
-  lc.setRow(0,4,i[4]);
-  lc.setRow(0,0,n[0]);
-  lc.setRow(0,1,n[1]);
-  lc.setRow(0,2,n[2]);
-  lc.setRow(0,3,n[3]);
-  lc.setRow(0,4,n[4]);
-  lc.setRow(0,0,o[0]);
-  lc.setRow(0,1,o[1]);
-  lc.setRow(0,2,o[2]);
-  lc.setRow(0,3,o[3]);
-  lc.setRow(0,4,o[4]);
-  lc.setRow(0,0,0);
-  lc.setRow(0,1,0);
-  lc.setRow(0,2,0);
-  lc.setRow(0,3,0);
-  lc.setRow(0,4,0);
 }
 
 /*
@@ -125,6 +64,10 @@ void loop() {
   //rows();
   //columns();
   //single();
+  for(int i = 0; i < 8; i++){
+    lc.setRow(0, i, byte_map[i]);
+  }
+  
   int x = analogRead(xPin);
   int y = analogRead(yPin);
   if(x > 500 && y > 1000){ //y axis positive
@@ -168,7 +111,7 @@ void loop() {
     break;
   }
   delay(JOYCON_INPUT_DELAY);
-
+  
 }
 
 /* returns byte BXXXXXXXX in correspondence to player position Y */
