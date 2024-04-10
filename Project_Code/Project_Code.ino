@@ -94,18 +94,18 @@ void loop() {
 
   switch(cardinality){
     case(1):
-    lc.setRow(0,player1_x,birthOfByte(player1_y));
+    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
     break;
     case(2):
-    lc.setRow(0,player1_x - 1, ZERO); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
-    lc.setRow(0,player1_x,birthOfByte(player1_y));
+    lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
+    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
     break;
     case(3):
-    lc.setRow(0,player1_x,birthOfByte(player1_y));
+    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
     break;
     case(4):
-    lc.setRow(0,player1_x + 1, ZERO);
-    lc.setRow(0,player1_x,birthOfByte(player1_y));
+    lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
+    lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
     break;
     default:
     break;
@@ -115,9 +115,9 @@ void loop() {
 }
 
 /* returns byte BXXXXXXXX in correspondence to player position Y */
-byte birthOfByte(short int y){
+byte birthOfByte(short int y, short int x){
   byte temp = B00000000;
   temp = temp | (ONE << (7 - y));
-  temp = temp | byte_map[y];
+  temp = temp | byte_map[x]; //to OR the original map byte structure if something is added it should go to 1
   return temp;
 }
