@@ -118,5 +118,6 @@ void loop() {
 byte birthOfByte(short int y){
   byte temp = B00000000;
   temp = temp | (ONE << (7 - y));
+  temp = temp | byte_map[y];
   return temp;
 }
