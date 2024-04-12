@@ -13,11 +13,21 @@
  We have only a single MAX72XX.
  */
 LedControl lc=LedControl(12,10,11,1);
-short int game_map [8][8] = {0}; //short to save space
+    short int game_map[8][8] = { //the is referencing notability drawing for positioning technically it is sideways from max perspective
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 1, 1, 1, 1, 1, 0},
+        {1, 1, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 1},
+        {0, 1, 1, 1, 1, 1, 1, 1},
+        {0, 0, 1, 0, 0, 0, 1, 1},
+        {1, 0, 1, 0, 1, 0, 0, 0},
+        {1, 0, 0, 0, 1, 1, 1, 0}
+    };
 const int xPin = A0;
 const int yPin = A1;
-short int player1_x = 3; //used to find row 0 - 7
-short int player1_y = 3; 
+short int player1_x = 0; //used to find row 0 - 7
+short int player1_y = 0; 
+short int prev_player1_x = 0;
 short int cardinality = -1; //1 for y pos 2 for x pos 3 for y neg 4 for x neg
 int ONE = 1;
 int ZERO = 0;
@@ -37,10 +47,15 @@ void setup() {
    */
   lc.shutdown(0,false);
   /* Set the brightness to a medium values */
-  lc.setIntensity(0,8);
+  lc.setIntensity(0,1);
   /* and clear the display */
   lc.clearDisplay(0);
   Serial.begin(9600);
+    for(int i = 0; i < 8; i++){
+    lc.setRow(0, i, byte_map[i]);
+  }
+  lc.setRow(0, 0, B10000000); //initial player position
+
 }
 
 /*
@@ -64,52 +79,84 @@ void loop() {
   //rows();
   //columns();
   //single();
-  for(int i = 0; i < 8; i++){
-    lc.setRow(0, i, byte_map[i]);
-  }
+
   
   int x = analogRead(xPin);
   int y = analogRead(yPin);
   if(x > 500 && y > 1000){ //y axis positive
-    Serial.print("1\n");
-
+    //Serial.print("1\n");
     cardinality = 1;
-    if(player1_y< 7) player1_y += 1;
+    if(player1_y < 7) player1_y += 1;
   } else if(x > 1000 && y > 500){ //x axis positive
-    Serial.print("2\n");
-
+    //Serial.print("2\n");
     cardinality = 2;
-    if(player1_x< 7)player1_x += 1;
+    if(player1_x < 7)player1_x += 1;
   } else if(y < 15 && x > 500){ //y axis negative
-    Serial.print("3\n");
-
+    //Serial.print("3\n");
     cardinality = 3;
-    if(player1_y> 0)player1_y -= 1;
+    if(player1_y > 0)player1_y -= 1;
   } else if(y > 500 && x < 10){ //x axis negative
-    Serial.print("4\n");
-
+    //Serial.print("4\n");
     cardinality = 4;
-    if(player1_x> 0)player1_x -= 1;
+    if(player1_x > 0)player1_x -= 1;
   }
 
   switch(cardinality){
+
     case(1):
-    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+    if(checkMapCollision(player1_x, player1_y)){ /* THIS IF CHECK CAN BE PUT OUTSIDE THE SWITCH FOR BREVITY!!!!!!!!!!!!!!!!!!!!!!!!! */
+      prev_player1_x = player1_x;
+      player1_x = 0;
+      player1_y = 0;
+      lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]); //wherever the player position was before reset that row to original terrain with byte map
+    } else {
+      lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+    }
     break;
+
     case(2):
-    lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
-    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      if(checkMapCollision(player1_x, player1_y)){
+        prev_player1_x = player1_x;
+        Serial.print(prev_player1_x);
+        player1_x = 0;
+        player1_y = 0;
+        lc.setRow(0,prev_player1_x-1, byte_map[prev_player1_x-1]); //needs offset as move right then detect collision then positioning if off by 1
+      } else {
+        lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
+        lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      }
     break;
+
     case(3):
-    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      if(checkMapCollision(player1_x, player1_y)){
+        prev_player1_x = player1_x;
+        player1_x = 0;
+        player1_y = 0;
+        lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]);
+      } else {
+        lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      }
     break;
+
     case(4):
-    lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
-    lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
+        if(checkMapCollision(player1_x, player1_y)){
+        prev_player1_x = player1_x;
+        player1_x = 0;
+        player1_y = 0;
+        lc.setRow(0,prev_player1_x+1, byte_map[prev_player1_x+1]); //needs offset as move right then detect collision then positioning if off by 1
+      } else {
+        lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
+        lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
+      }
     break;
+    
     default:
     break;
   }
+  /*Serial.print(player1_x);
+  Serial.print("      ");
+  Serial.print(player1_y);
+  Serial.print("\n");*/
   delay(JOYCON_INPUT_DELAY);
   
 }
@@ -120,4 +167,17 @@ byte birthOfByte(short int y, short int x){
   temp = temp | (ONE << (7 - y));
   temp = temp | byte_map[x]; //to OR the original map byte structure if something is added it should go to 1
   return temp;
+}
+
+/* This will check if current position is insersecting with the map if it is then it will return true else false, if return true then set play position back to the start */
+bool checkMapCollision(short int x, short int y){
+  bool flag = false;
+  if(game_map[x][y] == 1){
+    flag = true;
+  }
+  return flag;
+}
+
+bool victoryCheck(){
+  return false;
 }
