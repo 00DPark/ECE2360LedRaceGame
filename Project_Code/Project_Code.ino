@@ -3,6 +3,7 @@
 
 //We always have to include the library
 #include "LedControl.h"
+#include <LiquidCrystal.h>                //
 
 /*
  Now we need a LedControl to work with.
@@ -13,6 +14,8 @@
  We have only a single MAX72XX.
  */
 LedControl lc=LedControl(12,10,11,1);
+LiquidCrystal lcd(0, 1, 2, 3, 4 , 5 );
+
     short int game_map[8][8] = { //the is referencing notability drawing for positioning technically it is sideways from max perspective
         {0, 0, 0, 0, 0, 0, 0, 0},
         {1, 1, 1, 1, 1, 1, 1, 0},
@@ -55,6 +58,9 @@ void setup() {
     lc.setRow(0, i, byte_map[i]);
   }
   lc.setRow(0, 0, B10000000); //initial player position
+    
+  lcd.begin(16, 2);  // set up the LCD's number of columns and rows: 
+
 
 }
 
@@ -79,7 +85,8 @@ void loop() {
   //rows();
   //columns();
   //single();
-
+  lcd.setCursor(0, 0);
+  lcd.print("HELLO");
   
   int x = analogRead(xPin);
   int y = analogRead(yPin);
