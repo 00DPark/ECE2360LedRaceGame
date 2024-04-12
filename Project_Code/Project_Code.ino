@@ -37,10 +37,14 @@ void setup() {
    */
   lc.shutdown(0,false);
   /* Set the brightness to a medium values */
-  lc.setIntensity(0,8);
+  lc.setIntensity(0,2);
   /* and clear the display */
   lc.clearDisplay(0);
+
+
   Serial.begin(9600);
+
+
 }
 
 /*
@@ -60,55 +64,23 @@ void setup() {
  */
 
 void loop() { 
-  //writeArduinoOnMatrix();
-  //rows();
-  //columns();
-  //single();
-  for(int i = 0; i < 8; i++){
-    lc.setRow(0, i, byte_map[i]);
-  }
-  
+  /* creates the byte map maze */
+  createMap();
   int x = analogRead(xPin);
   int y = analogRead(yPin);
-  if(x > 500 && y > 1000){ //y axis positive
-    Serial.print("1\n");
 
-    cardinality = 1;
-    if(player1_y< 7) player1_y += 1;
-  } else if(x > 1000 && y > 500){ //x axis positive
-    Serial.print("2\n");
+  /* determines player direction/position and then updates the LED displayed */
+  setCardinality(x, y);
+  switchCardinality();
 
-    cardinality = 2;
-    if(player1_x< 7)player1_x += 1;
-  } else if(y < 15 && x > 500){ //y axis negative
-    Serial.print("3\n");
-
-    cardinality = 3;
-    if(player1_y> 0)player1_y -= 1;
-  } else if(y > 500 && x < 10){ //x axis negative
-    Serial.print("4\n");
-
-    cardinality = 4;
-    if(player1_x> 0)player1_x -= 1;
-  }
-
-  switch(cardinality){
-    case(1):
-    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
-    break;
-    case(2):
-    lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
-    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
-    break;
-    case(3):
-    lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
-    break;
-    case(4):
-    lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
-    lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
-    break;
-    default:
-    break;
+  bool outOfBounds= false;
+  for(int i=0; i< 8; i++)
+  {
+      int result = memcmp( birthOfByte(player1_y, player1_x), byte_map[i], 8 ); 
+      if(result == 0)
+      {
+        Serial.println("Out of Bounds");
+      }                                 
   }
   delay(JOYCON_INPUT_DELAY);
   
@@ -120,4 +92,64 @@ byte birthOfByte(short int y, short int x){
   temp = temp | (ONE << (7 - y));
   temp = temp | byte_map[x]; //to OR the original map byte structure if something is added it should go to 1
   return temp;
+}
+
+/* switches the cardinality of the plauer and lights up the LED associated with where the player is located */
+void switchCardinality()
+{
+  switch(cardinality)
+  {
+    case(1):
+      lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      break;
+    case(2):
+      lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
+      lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      break;
+    case(3):
+      lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      break;
+    case(4):
+      lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
+      lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
+      break;
+    default:
+      break;
+  }
+}
+
+/* determines the cardinality of the player and updates player position accordingly */
+void setCardinality(int x, int y)
+{
+  if(x > 500 && y > 1000)
+  { 
+    //y axis positive
+    cardinality = 1;
+    if(player1_y< 7) player1_y += 1;
+  } 
+  else if(x > 1000 && y > 500)
+  {
+    cardinality = 2;
+    if(player1_x< 7)player1_x += 1;
+  } 
+  else if(y < 15 && x > 500)
+  { 
+    //y axis negative
+    cardinality = 3;
+    if(player1_y> 0)player1_y -= 1;
+  } 
+  else if(y > 500 && x < 10)
+  { //x axis negative
+    cardinality = 4;
+    if(player1_x> 0)player1_x -= 1;
+  }
+}
+
+/* creates the byte map maze */
+void createMap()
+{
+  for(int i = 0; i < 8; i++)
+  {
+    lc.setRow(0, i, byte_map[i]);
+  }
 }
