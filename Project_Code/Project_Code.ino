@@ -14,7 +14,7 @@
  We have only a single MAX72XX.
  */
 LedControl lc=LedControl(13,11,12,1);
-LiquidCrystal lcd(2, 3, 4 , 5, 6 ,7 );
+LiquidCrystal lcd(7, 6, 5 , 4, 3 ,2);
 
 /* set up button,LED, buzzer*/
 const int buttonPin= 22;
@@ -68,6 +68,7 @@ void setup() {
   lc.setRow(0, 0, B10000000); //initial player position
     
   lcd.begin(16, 2);  // set up the LCD's number of columns and rows: 
+  lcd.print("Player1: ");
 
   
   pinMode(buttonPin, INPUT); //initialize the button pin as input
