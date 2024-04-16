@@ -13,8 +13,14 @@
  pin 10 is connected to the CLK 
  We have only a single MAX72XX.
  */
-LedControl lc=LedControl(12,10,11,1);
-LiquidCrystal lcd(0, 1, 2, 3, 4 , 5 );
+LedControl lc=LedControl(13,11,12,1);
+LiquidCrystal lcd(2, 3, 4 , 5, 6 ,7 );
+
+/* set up button,LED, buzzer*/
+const int buttonPin= 22;
+const int ledPin=24;
+const int buzzerPin=26;
+int buttonState=0;
 
     short int game_map[8][8] = { //the is referencing notability drawing for positioning technically it is sideways from max perspective
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -61,7 +67,10 @@ void setup() {
     
   lcd.begin(16, 2);  // set up the LCD's number of columns and rows: 
 
-
+  
+  pinMode(buttonPin, INPUT); //initialize the button pin as input
+  pinMode(ledPin, OUTPUT); //initialize the led pin as output
+  pinMode(buzzerPin, OUTPUT); //initialize the buzzer pin as output
 }
 
 /*
@@ -81,43 +90,60 @@ void setup() {
  */
 
 void loop() { 
-  //writeArduinoOnMatrix();
-  //rows();
-  //columns();
-  //single();
+
   lcd.setCursor(0, 0);
   lcd.print("HELLO");
   
   int x = analogRead(xPin);
   int y = analogRead(yPin);
-  if(x > 500 && y > 1000){ //y axis positive
-    //Serial.print("1\n");
+
+  buttonState=digitalRead(buttonPin);
+  
+  if(buttonState == HIGH)
+  {
+    //reset the player
+    prev_player1_x = player1_x;
+    player1_x = 0;
+    player1_y = 0;
+    lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]);
+  }
+
+  
+  if(x > 500 && y > 1000)
+  { //y axis positive
     cardinality = 1;
     if(player1_y < 7) player1_y += 1;
-  } else if(x > 1000 && y > 500){ //x axis positive
-    //Serial.print("2\n");
+  } 
+  else if(x > 1000 && y > 500)
+  { //x axis positive
     cardinality = 2;
     if(player1_x < 7)player1_x += 1;
-  } else if(y < 15 && x > 500){ //y axis negative
-    //Serial.print("3\n");
+  } 
+  else if(y < 15 && x > 500)
+  { //y axis negative
     cardinality = 3;
     if(player1_y > 0)player1_y -= 1;
-  } else if(y > 500 && x < 10){ //x axis negative
-    //Serial.print("4\n");
+  }
+  else if(y > 500 && x < 10)
+  { //x axis negative
     cardinality = 4;
     if(player1_x > 0)player1_x -= 1;
   }
 
-  switch(cardinality){
-
+  switch(cardinality)
+  {
     case(1):
     if(checkMapCollision(player1_x, player1_y)){ /* THIS IF CHECK CAN BE PUT OUTSIDE THE SWITCH FOR BREVITY!!!!!!!!!!!!!!!!!!!!!!!!! */
       prev_player1_x = player1_x;
       player1_x = 0;
       player1_y = 0;
       lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]); //wherever the player position was before reset that row to original terrain with byte map
+      digitalWrite(ledPin, LOW);
+      digitalWrite(buzzerPin, HIGH);
     } else {
       lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+      digitalWrite(ledPin, HIGH);
+      digitalWrite(buzzerPin, LOW);
     }
     break;
 
@@ -128,9 +154,13 @@ void loop() {
         player1_x = 0;
         player1_y = 0;
         lc.setRow(0,prev_player1_x-1, byte_map[prev_player1_x-1]); //needs offset as move right then detect collision then positioning if off by 1
+        digitalWrite(ledPin, LOW);
+        digitalWrite(buzzerPin, HIGH);
       } else {
         lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
         lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+        digitalWrite(ledPin, HIGH);
+        digitalWrite(buzzerPin, LOW);
       }
     break;
 
@@ -140,8 +170,13 @@ void loop() {
         player1_x = 0;
         player1_y = 0;
         lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]);
+        digitalWrite(ledPin, LOW);
+        digitalWrite(buzzerPin, HIGH);
       } else {
         lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+        digitalWrite(ledPin, HIGH);
+        digitalWrite(buzzerPin, LOW);
+
       }
     break;
 
@@ -151,19 +186,20 @@ void loop() {
         player1_x = 0;
         player1_y = 0;
         lc.setRow(0,prev_player1_x+1, byte_map[prev_player1_x+1]); //needs offset as move right then detect collision then positioning if off by 1
+        digitalWrite(ledPin, LOW);
+        digitalWrite(buzzerPin, HIGH);
       } else {
         lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
         lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
+        digitalWrite(ledPin, HIGH);
+        digitalWrite(buzzerPin, LOW);
       }
     break;
     
     default:
     break;
   }
-  /*Serial.print(player1_x);
-  Serial.print("      ");
-  Serial.print(player1_y);
-  Serial.print("\n");*/
+
   delay(JOYCON_INPUT_DELAY);
   
 }
