@@ -93,7 +93,6 @@ void setup() {
  */
 
 void loop() { 
-
   if(millis() - prev_ms_time > 1000){ //by seconds 
     prev_ms_time = millis();
     player1_time += 1;
@@ -206,9 +205,13 @@ void loop() {
     default:
     break;
   }
+  //debug
+  Serial.print("X: ");
+  Serial.print(player1_x);
+  Serial.print("  Y: ");
+  Serial.println(player1_y);
 
   delay(JOYCON_INPUT_DELAY);
-  
 }
 
 /* returns byte BXXXXXXXX in correspondence to player position Y */
