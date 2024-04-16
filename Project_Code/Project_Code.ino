@@ -3,7 +3,7 @@
 
 //We always have to include the library
 #include "LedControl.h"
-#include <LiquidCrystal.h>                //
+#include <LiquidCrystal.h>               
 
 /*
  Now we need a LedControl to work with.
@@ -17,10 +17,10 @@ LedControl lc=LedControl(13,11,12,1);
 LiquidCrystal lcd(7, 6, 5 , 4, 3 ,2);
 
 /* set up button,LED, buzzer*/
-const int buttonPin= 22;
+const int buttonPin= 8;
 const int ledPin=24;
 const int buzzerPin=26;
-int buttonState=0;
+int buttonState= 0;
 
     short int game_map[8][8] = { //the is referencing notability drawing for positioning technically it is sideways from max perspective
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -93,6 +93,12 @@ void setup() {
  */
 
 void loop() { 
+  buttonState=digitalRead(buttonPin);
+  
+  if(buttonState == HIGH) //highest hiearchy check for reset
+  {
+    reset();
+  } else {
   if(millis() - prev_ms_time > 1000){ //by seconds 
     prev_ms_time = millis();
     player1_time += 1;
@@ -103,18 +109,6 @@ void loop() {
   int x = analogRead(xPin);
   int y = analogRead(yPin);
 
-  buttonState=digitalRead(buttonPin);
-  
-  if(buttonState == HIGH)
-  {
-    //reset the player
-    prev_player1_x = player1_x;
-    player1_x = 0;
-    player1_y = 0;
-    lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]);
-  }
-
-  
   if(x > 500 && y > 1000)
   { //y axis positive
     cardinality = 1;
@@ -205,6 +199,7 @@ void loop() {
     default:
     break;
   }
+  }
   //debug
   Serial.print("X: ");
   Serial.print(player1_x);
@@ -229,6 +224,27 @@ bool checkMapCollision(short int x, short int y){
     flag = true;
   }
   return flag;
+}
+
+void reset(){
+  //reset player position
+  player1_x = 0;
+  player1_y = 0;
+
+  //reset the matrix
+  lc.clearDisplay(0);
+  delay(1000); //delay for giggles
+  for(int i = 0; i < 8; i++){
+    lc.setRow(0, i, byte_map[i]);
+  }
+
+  //reset the lcd
+  lcd.clear();
+  lcd.print("Player1:");
+
+  //reset the time
+  player1_time = 0;
+  prev_ms_time = 0;
 }
 
 bool victoryCheck(){
