@@ -41,6 +41,8 @@ short int cardinality = -1; //1 for y pos 2 for x pos 3 for y neg 4 for x neg
 int ONE = 1;
 int ZERO = 0;
 const short int JOYCON_INPUT_DELAY = 100;
+int player1_time = 0;
+unsigned long prev_ms_time = 0;
 byte byte_map[8]={B00000000,B11111110,B11000100,B00010001,B01111111,B00100011,B10101000,B10001110};
 
 
@@ -91,8 +93,12 @@ void setup() {
 
 void loop() { 
 
-  lcd.setCursor(0, 0);
-  lcd.print("HELLO");
+  if(millis() - prev_ms_time > 1000){ //by seconds 
+    prev_ms_time = millis();
+    player1_time += 1;
+  }
+  lcd.setCursor(8,0); //to rset what was there before.
+  lcd.print(player1_time);
   
   int x = analogRead(xPin);
   int y = analogRead(yPin);
