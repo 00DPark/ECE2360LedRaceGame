@@ -98,107 +98,118 @@ void loop() {
   if(buttonState == HIGH) //highest hiearchy check for reset
   {
     reset();
-  } else {
-  if(millis() - prev_ms_time > 1000){ //by seconds 
-    prev_ms_time = millis();
-    player1_time += 1;
-  }
-  lcd.setCursor(8,0); //to rset what was there before.
-  lcd.print(player1_time);
-  
-  int x = analogRead(xPin);
-  int y = analogRead(yPin);
-
-  if(x > 500 && y > 1000)
-  { //y axis positive
-    cardinality = 1;
-    if(player1_y < 7) player1_y += 1;
   } 
-  else if(x > 1000 && y > 500)
-  { //x axis positive
-    cardinality = 2;
-    if(player1_x < 7)player1_x += 1;
-  } 
-  else if(y < 15 && x > 500)
-  { //y axis negative
-    cardinality = 3;
-    if(player1_y > 0)player1_y -= 1;
-  }
-  else if(y > 500 && x < 10)
-  { //x axis negative
-    cardinality = 4;
-    if(player1_x > 0)player1_x -= 1;
-  }
-
-  switch(cardinality)
+  else 
   {
-    case(1):
-    if(checkMapCollision(player1_x, player1_y)){ /* THIS IF CHECK CAN BE PUT OUTSIDE THE SWITCH FOR BREVITY!!!!!!!!!!!!!!!!!!!!!!!!! */
-      prev_player1_x = player1_x;
-      player1_x = 0;
-      player1_y = 0;
-      lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]); //wherever the player position was before reset that row to original terrain with byte map
-      digitalWrite(ledPin, LOW);
-      digitalWrite(buzzerPin, HIGH);
-    } else {
-      lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
-      digitalWrite(ledPin, HIGH);
-      digitalWrite(buzzerPin, LOW);
+    if(!victoryCheck())
+    {
+      if(millis() - prev_ms_time > 1000){ //by seconds 
+        prev_ms_time = millis();
+        player1_time += 1;
+      }
+      lcd.setCursor(8,0); //to rset what was there before.
+      lcd.print(player1_time);
+      
+      int x = analogRead(xPin);
+      int y = analogRead(yPin);
+
+      if(x > 500 && y > 1000)
+      { //y axis positive
+        cardinality = 1;
+        if(player1_y < 7) player1_y += 1;
+      } 
+      else if(x > 1000 && y > 500)
+      { //x axis positive
+        cardinality = 2;
+        if(player1_x < 7)player1_x += 1;
+      } 
+      else if(y < 15 && x > 500)
+      { //y axis negative
+        cardinality = 3;
+        if(player1_y > 0)player1_y -= 1;
+      }
+      else if(y > 500 && x < 10)
+      { //x axis negative
+        cardinality = 4;
+        if(player1_x > 0)player1_x -= 1;
+      }
+
+      switch(cardinality)
+      {
+        case(1):
+        if(checkMapCollision(player1_x, player1_y)){ /* THIS IF CHECK CAN BE PUT OUTSIDE THE SWITCH FOR BREVITY!!!!!!!!!!!!!!!!!!!!!!!!! */
+          prev_player1_x = player1_x;
+          player1_x = 0;
+          player1_y = 0;
+          lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]); //wherever the player position was before reset that row to original terrain with byte map
+          digitalWrite(ledPin, LOW);
+          digitalWrite(buzzerPin, HIGH);
+        } else {
+          lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+          digitalWrite(ledPin, HIGH);
+          digitalWrite(buzzerPin, LOW);
+        }
+        break;
+
+        case(2):
+          if(checkMapCollision(player1_x, player1_y)){
+            prev_player1_x = player1_x;
+            Serial.print(prev_player1_x);
+            player1_x = 0;
+            player1_y = 0;
+            lc.setRow(0,prev_player1_x-1, byte_map[prev_player1_x-1]); //needs offset as move right then detect collision then positioning if off by 1
+            digitalWrite(ledPin, LOW);
+            digitalWrite(buzzerPin, HIGH);
+          } else {
+            lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
+            lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+            digitalWrite(ledPin, HIGH);
+            digitalWrite(buzzerPin, LOW);
+          }
+        break;
+
+        case(3):
+          if(checkMapCollision(player1_x, player1_y)){
+            prev_player1_x = player1_x;
+            player1_x = 0;
+            player1_y = 0;
+            lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]);
+            digitalWrite(ledPin, LOW);
+            digitalWrite(buzzerPin, HIGH);
+          } else {
+            lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
+            digitalWrite(ledPin, HIGH);
+            digitalWrite(buzzerPin, LOW);
+
+          }
+        break;
+
+        case(4):
+            if(checkMapCollision(player1_x, player1_y)){
+            prev_player1_x = player1_x;
+            player1_x = 0;
+            player1_y = 0;
+            lc.setRow(0,prev_player1_x+1, byte_map[prev_player1_x+1]); //needs offset as move right then detect collision then positioning if off by 1
+            digitalWrite(ledPin, LOW);
+            digitalWrite(buzzerPin, HIGH);
+          } else {
+            lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
+            lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
+            digitalWrite(ledPin, HIGH);
+            digitalWrite(buzzerPin, LOW);
+          }
+        break;
+        
+        default:
+        break;
+      }
     }
-    break;
-
-    case(2):
-      if(checkMapCollision(player1_x, player1_y)){
-        prev_player1_x = player1_x;
-        Serial.print(prev_player1_x);
-        player1_x = 0;
-        player1_y = 0;
-        lc.setRow(0,prev_player1_x-1, byte_map[prev_player1_x-1]); //needs offset as move right then detect collision then positioning if off by 1
-        digitalWrite(ledPin, LOW);
-        digitalWrite(buzzerPin, HIGH);
-      } else {
-        lc.setRow(0,player1_x - 1, byte_map[player1_x - 1]); //See notability doc... this needs reset as it crosses rows so if map used then have to reset in accordance to that rows "terrain"
-        lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
-        digitalWrite(ledPin, HIGH);
-        digitalWrite(buzzerPin, LOW);
-      }
-    break;
-
-    case(3):
-      if(checkMapCollision(player1_x, player1_y)){
-        prev_player1_x = player1_x;
-        player1_x = 0;
-        player1_y = 0;
-        lc.setRow(0,prev_player1_x, byte_map[prev_player1_x]);
-        digitalWrite(ledPin, LOW);
-        digitalWrite(buzzerPin, HIGH);
-      } else {
-        lc.setRow(0,player1_x,birthOfByte(player1_y,player1_x));
-        digitalWrite(ledPin, HIGH);
-        digitalWrite(buzzerPin, LOW);
-
-      }
-    break;
-
-    case(4):
-        if(checkMapCollision(player1_x, player1_y)){
-        prev_player1_x = player1_x;
-        player1_x = 0;
-        player1_y = 0;
-        lc.setRow(0,prev_player1_x+1, byte_map[prev_player1_x+1]); //needs offset as move right then detect collision then positioning if off by 1
-        digitalWrite(ledPin, LOW);
-        digitalWrite(buzzerPin, HIGH);
-      } else {
-        lc.setRow(0,player1_x + 1, byte_map[player1_x + 1]);
-        lc.setRow(0,player1_x,birthOfByte(player1_y, player1_x));
-        digitalWrite(ledPin, HIGH);
-        digitalWrite(buzzerPin, LOW);
-      }
-    break;
-    
-    default:
-    break;
-  }
+    else
+    {
+      lcd.clear();
+      lcd.print("Victory ");
+      lcd.print(player1_time);
+    }
   }
   //debug
   Serial.print("X: ");
@@ -248,5 +259,9 @@ void reset(){
 }
 
 bool victoryCheck(){
+  if(player1_x== 7 && player1_y==7)
+  {
+      return true;
+  }
   return false;
 }
